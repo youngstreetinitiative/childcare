@@ -114,16 +114,47 @@ df2 <- df %>% group_by(Asset_Quint, Inc_Quint) %>%
   summarise(Annual_ChildCare_PQ = sum(Annual_ChildCare))
 
 dfAsset <- df %>% group_by(Asset_Quint) %>%
-  summarise(Annual_ChildCare_PQ = sum(Annual_ChildCare))
+  summarise(Annual_ChildCare_PQ = sum(Annual_ChildCare)) %>%
+  mutate(Type = "Assets") %>%
+  ungroup() %>%
+  rename(Quintile = Asset_Quint)
 
 dfInc <- df %>% group_by(Inc_Quint) %>%
-  summarise(Annual_ChildCare_PQ = sum(Annual_ChildCare))
+  summarise(Annual_ChildCare_PQ = sum(Annual_ChildCare)) %>%
+  mutate(Type = "Income") %>%
+  ungroup() %>%
+  rename(Quintile = Inc_Quint)
 
-plotAsset <- ggplot(dfAsset, aes(x = Asset_Quint, y = Annual_ChildCare_PQ)) + geom_bar(stat = "Identity")
-plotInc <- ggplot(dfInc, aes(x = Inc_Quint, y = Annual_ChildCare_PQ)) + geom_bar(stat = "Identity")
+dfall <- rbind(dfInc, dfAsset)
+
+plotAsset <- ggplot(dfAsset, aes(x = Asset_Quint, y = Annual_ChildCare_PQ)) + 
+  geom_bar(stat = "Identity") + 
+  ggtitle("Childcare Changes - Allocation per Wealth Quintiles in HILDA") +
+  xlab("Household Wealth Quintiles") +
+  ylab("Total Monies Allocated") +
+  scale_y_continuous(labels = dollar)
+
+plotInc <- ggplot(dfInc, aes(x = Inc_Quint, y = Annual_ChildCare_PQ)) + 
+  geom_bar(stat = "Identity") + 
+  ggtitle("Childcare Changes - Allocation per Income Quintiles in HILDA") +
+  xlab("Household Income Quintiles") +
+  ylab("Total Monies Allocated") + 
+  scale_y_continuous(labels = dollar)
+
+
+plotall <- ggplot(dfall, aes(x = Quintile, y = Annual_ChildCare_PQ, fill = Quintile)) + 
+  geom_bar(stat = "Identity") + 
+  facet_grid(~Type) +
+  ggtitle("Childcare Changes - Allocation per Income and Asset Quintiles in HILDA") +
+  xlab("Household Income and Asset Quintiles") +
+  ylab("Total Monies Allocated") + 
+  scale_y_continuous(labels = dollar)
 
 print(plotAsset)
 print(plotInc)
+print(plotall)
+
+
 
 subsidy_allocation <- function(df){
 
